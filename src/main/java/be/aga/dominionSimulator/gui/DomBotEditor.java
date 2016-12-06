@@ -392,6 +392,7 @@ public class DomBotEditor extends EscapeDialog implements ActionListener {
 
     private JList getTypeList() {
     	myBotTypeList = new JList(DomBotType.values());
+    	myBotTypeList.setSelectionModel(new ToggleListSelectionModel());
     	ArrayList<DomBotType> thePossibleTypes = new ArrayList<DomBotType>();
     	myBotTypeList.setSelectionModel(new ToggleListSelectionModel());
     	for (DomBotType botType : DomBotType.values()){
