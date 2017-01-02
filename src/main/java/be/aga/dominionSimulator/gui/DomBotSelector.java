@@ -1,9 +1,11 @@
 package be.aga.dominionSimulator.gui;
 
+import be.aga.dominionSimulator.DomBuyRule;
 import be.aga.dominionSimulator.DomEngine;
 import be.aga.dominionSimulator.DomPlayer;
 import be.aga.dominionSimulator.enums.DomBotType;
 import be.aga.dominionSimulator.enums.DomCardName;
+import be.aga.dominionSimulator.enums.DomSet;
 import org.jfree.ui.RefineryUtilities;
 
 import javax.swing.AbstractAction;
@@ -24,6 +26,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DomBotSelector extends EscapeDialog
         implements ListSelectionListener, ActionListener, WindowListener, DomCardFilterPanel.CardsChangedListener {
@@ -160,8 +164,28 @@ public class DomBotSelector extends EscapeDialog
             public String getToolTipText(MouseEvent evt) {
                 int index = locationToIndex(evt.getPoint());
                 Object item = getModel().getElementAt(index);
-                String theDescription = ((DomPlayer) item).getDescription().replaceAll("XXXX", "<br>");
-                return "<html>" + theDescription + "</html>";
+                DomPlayer bot = (DomPlayer) item;
+
+                StringBuilder tip = new StringBuilder();
+                tip.append("<html>");
+                tip.append(bot.getDescription().replaceAll("XXXX", "<br>"));
+
+                // Show the kingdom cards used by this bot.
+                tip.append("<p>Cards used:<ul>");
+                Set<DomCardName> cardSet = new HashSet<DomCardName>();
+                for (DomBuyRule rule : bot.getBuyRules()) {
+                    DomCardName card = rule.getCardToBuy();
+                    if (!cardSet.contains(card) && !DomSet.Common.contains(card)) {
+                        cardSet.add(card);
+                        tip.append("<li>");
+                        tip.append(rule.getCardToBuy().toHTML());
+                        tip.append("</li>\n");
+                    }
+                }
+                tip.append("</p></ul>");
+                tip.append("</html>");
+
+                return tip.toString();
             }
         };
         new ListAction(myBotList, chooseAction);
