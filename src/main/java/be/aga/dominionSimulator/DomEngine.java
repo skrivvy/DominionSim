@@ -70,10 +70,12 @@ public class DomEngine {
 	private DomGameFrame myGameFrame;
     
     public DomEngine () {
-      loadSystemBots();
-      createSimpleCardStrategiesBots();
-      myGui = new DomGui( this );
-      myGui.setVisible(true);
+    	if (!loadCurrentUserBots()) {
+			loadSystemBots();
+		}
+        createSimpleCardStrategiesBots();
+        myGui = new DomGui( this );
+        myGui.setVisible(true);
     }
     
     private void createSimpleCardStrategiesBots() {
@@ -109,6 +111,44 @@ public class DomEngine {
 		Collections.sort( bots );
 	}
 
+	public boolean loadCurrentUserBots() {
+		File botFile = new File(System.getProperty("user.home") + "/.domsim/userbots.xml");
+		LOGGER.info("loading from: " + botFile);
+		if (botFile.exists() && botFile.isFile()) {
+			Reader input = null;
+			try {
+				input = new BufferedReader(new FileReader(botFile));
+				loadUserBotsFromXML(new InputSource(input));
+				input.close();
+			} catch (IOException e1) {
+				LOGGER.error("failed to load current user bots", e1);
+				JOptionPane.showMessageDialog(myGui,
+						"Error Reading File", "error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+			return false;
+		}
+		return true;
+	}
+
+	public void saveCurrentUserBots() {
+		File botFile = new File(System.getProperty("user.home") + "/.domsim/userbots.xml");
+		LOGGER.info("saving to: " + botFile);
+		Writer output = null;
+		try {
+			botFile.getParentFile().mkdirs();
+			botFile.createNewFile();
+			output = new BufferedWriter(new FileWriter(botFile));
+			output.write(getXMLForAllUserBots());
+			output.close();
+		} catch (IOException e1) {
+			LOGGER.error("failed to save current user bots", e1);
+			JOptionPane.showMessageDialog(myGui,
+					"Error Writing File", "error",
+					JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
     public DomPlayer loadUserBotsFromXML(InputSource anXMLSource) {
 		try {
 			XMLHandler saxHandler = new XMLHandler();
@@ -117,7 +157,7 @@ public class DomEngine {
 			rdr.parse(anXMLSource);
 			ArrayList<DomPlayer> theNewPlayers = saxHandler.getBots();
 			for (DomPlayer thePlayer : theNewPlayers) {
-			  thePlayer.addType(DomBotType.UserCreated);
+			  //thePlayer.addType(DomBotType.UserCreated);
 			  addUserBot(thePlayer);
 			}
 			return bots.get(0);
@@ -319,7 +359,9 @@ public class DomEngine {
 			}
 		}
 		bots.add(0,theNewPlayer);
-		myGui.refreshBotSelectors(theNewPlayer);
+		if (myGui != null) {
+			myGui.refreshBotSelectors(theNewPlayer);
+		}
 	}
 
 	public void deleteBot(DomPlayer selectedItem) {

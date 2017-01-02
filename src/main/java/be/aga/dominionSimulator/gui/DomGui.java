@@ -70,6 +70,7 @@ public class DomGui extends JFrame implements ActionListener {
       pack();
       addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) {
+            myEngine.saveCurrentUserBots();
           System.exit(0);
         }
       });
