@@ -70,10 +70,9 @@ public class DomEngine {
 	private DomGameFrame myGameFrame;
     
     public DomEngine () {
-    	if (!loadCurrentUserBots()) {
-			loadSystemBots();
-		}
-        createSimpleCardStrategiesBots();
+		loadSystemBots();
+		createSimpleCardStrategiesBots();
+		loadCurrentUserBots();
         myGui = new DomGui( this );
         myGui.setVisible(true);
     }
@@ -157,7 +156,7 @@ public class DomEngine {
 			rdr.parse(anXMLSource);
 			ArrayList<DomPlayer> theNewPlayers = saxHandler.getBots();
 			for (DomPlayer thePlayer : theNewPlayers) {
-			  //thePlayer.addType(DomBotType.UserCreated);
+			  thePlayer.addType(DomBotType.UserCreated);
 			  addUserBot(thePlayer);
 			}
 			return bots.get(0);
